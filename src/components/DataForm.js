@@ -7,6 +7,7 @@ import { addData } from '../action';
 const emailRegEx = RegExp(
     /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/
 );
+const validUrl = /^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/;
 const DataForm = (props) => {
     const data = {
         name: '',
@@ -42,11 +43,8 @@ const DataForm = (props) => {
             case "email":
                 formError.email = emailRegEx.test(value) ? "" : "Enter Valid Email Id";
                 break;
-            case "date":
-                formError.date = value.length < 10 ? "Enter date in DD/MM/YYYY format" : "";
-                break;
             case "link":
-                formError.link = value.length < 3 ? "Enter valid link" : "";
+                formError.link = validUrl.test(value) ? "" : "Enter valid link";
                 break;
             default:
                 break;
@@ -58,13 +56,13 @@ const DataForm = (props) => {
         Object.values(ferror).forEach(element => {
             element.length > 0 && (valid = false);
         });
+
         return valid;
     }
 
     const handleHChange = (event) => {
         const target = event.target;
         var value = target.value;
-
         if (target.checked) {
             state.hobbies.push(value);
         } else {
@@ -83,8 +81,26 @@ const DataForm = (props) => {
     }
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (e.target.name.value == "") {
-            document.getElementById('fillform').innerHTML = "Please fill form , All fileds are Mandatory"
+        if ((document.getElementById('php').checked == false) && (document.getElementById('front').checked == false) && (document.getElementById('leader').checked == false)) {
+            document.getElementById('fillform').innerHTML = "Please Select skills"
+            if ((document.getElementById('cricket').checked == false) && (document.getElementById('reading').checked == false) && (document.getElementById('design').checked == false)) {
+                document.getElementById('fillform').innerHTML = "Please Select hobbies"
+                if ((document.getElementById('male').checked == false) && (document.getElementById('female').checked == false)) {
+                    document.getElementById('fillform').innerHTML = "Please Select Gender"
+                    if (e.target.link.value == "") {
+                        document.getElementById('fillform').innerHTML = "Link Required"
+                        if (e.target.date.value == "") {
+                            document.getElementById('fillform').innerHTML = "Date Required"
+                            if (e.target.email.value == "") {
+                                document.getElementById('fillform').innerHTML = "Email Required"
+                                if (e.target.name.value == "") {
+                                    document.getElementById('fillform').innerHTML = "Please fill form , All fileds are Mandatory"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
         else if (formValid(state.formError)) {
             let formdata = {
@@ -96,6 +112,32 @@ const DataForm = (props) => {
                 hobbies: state.hobbies.join(),
                 skills: state.skills.join(),
             };
+            var group = document.formvalidation.gender;
+            for (var i = 0; i < group.length; i++) {
+                if (group[i].checked)
+                    break;
+            }
+            if (i == group.length) {
+                document.getElementById('genderCheck').innerHTML = "Please Select anyone";
+            }
+
+            var group = document.formvalidation.hobbies;
+            for (var i = 0; i < group.length; i++) {
+                if (group[i].checked)
+                    break;
+            }
+            if (i == group.length) {
+                document.getElementById('hobbieCheck').innerHTML = "Please Select anyone";
+            }
+
+            var group = document.formvalidation.skills;
+            for (var i = 0; i < group.length; i++) {
+                if (group[i].checked)
+                    break;
+            }
+            if (i == group.length) {
+                document.getElementById('skillCheck').innerHTML = "Please Select anyone";
+            }
             props.addData(formdata);
             setState(data)
 
@@ -106,7 +148,7 @@ const DataForm = (props) => {
 
     return (
         <div className="col-md-4 offset-md-4">
-            <form onSubmit={handleSubmit}>
+            <form name="formvalidation" onSubmit={handleSubmit}>
 
                 <label>Name</label>
                 <input
@@ -115,6 +157,7 @@ const DataForm = (props) => {
                     placeholder="name"
                     onChange={handleChange}
                     value={state.name}
+
                 />
                 {state.formError.name.length > 0 && (
                     <span>{state.formError.name}</span>
@@ -126,18 +169,19 @@ const DataForm = (props) => {
                     name="email"
                     placeholder="Email"
                     onChange={handleChange}
-                    value={state.email}
+
                 />
                 {state.formError.email.length > 0 && (
                     <span>{state.formError.email}</span>
                 )}<br />
                 <label>Date</label>
                 <input
-                    type="text"
+                    type="date"
                     name="date"
                     placeholder="date"
                     onChange={handleChange}
                     value={state.date}
+
                 />
                 {state.formError.date.length > 0 && (
                     <span>{state.formError.date}</span>
@@ -150,6 +194,7 @@ const DataForm = (props) => {
                     placeholder="link"
                     onChange={handleChange}
                     value={state.link}
+
                 />
                 {state.formError.link.length > 0 && (
                     <span>{state.formError.link}</span>
@@ -160,26 +205,30 @@ const DataForm = (props) => {
                 <label>Male</label>
                 <input type="radio" id="female" name="gender" value="female" checked={state.gender == "female"} onChange={handleChange} />
                 <label>Female</label>
+                <span id="genderCheck"></span>
                 <br />
 
 
                 <label>Hobbies</label><br />
-                <input type="checkbox" name="hobbies" id="inlineCheckboxh1" value="cricket" onChange={handleHChange} />
+                <input type="checkbox" name="hobbies" id="cricket" value="cricket" onChange={handleHChange} />
                 <label>Cricket</label>
-                <input type="checkbox" name="hobbies" id="inlineCheckboxh2" value="reading" onChange={handleHChange} />
+                <input type="checkbox" name="hobbies" id="reading" value="reading" onChange={handleHChange} />
                 <label>Reading</label>
-                <input type="checkbox" name="hobbies" id="inlineCheckboxh3" value="designing" onChange={handleHChange} />
+                <input type="checkbox" name="hobbies" id="design" value="designing" onChange={handleHChange} />
                 <label>Desiging</label>
+                <span id="hobbieCheck"></span>
                 <br />
 
 
                 <label>Skills :</label><br />
-                <input type="checkbox" name="skills" id="inlineCheckbox1" value="php" onChange={handleSChange} />
+                <input type="checkbox" name="skills" id="php" value="php" onChange={handleSChange} />
                 <label>php</label>
-                <input type="checkbox" name="skills" id="inlineCheckbox2" value="Frontend" onChange={handleSChange} />
+                <input type="checkbox" name="skills" id="front" value="Frontend" onChange={handleSChange} />
                 <label>Frontend</label>
-                <input type="checkbox" name="skills" id="inlineCheckbox3" value="Leadership" onChange={handleSChange} />
+                <input type="checkbox" name="skills" id="leader" value="Leadership" onChange={handleSChange} />
                 <label>Leadership</label>
+                <span id="skillCheck"></span>
+
                 <button>Submit</button>
                 <span id="fillform"></span>
 
